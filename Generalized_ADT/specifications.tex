@@ -1,0 +1,505 @@
+\documentclass[12pt,fleqn]{article}
+
+\usepackage{graphicx}
+\usepackage{paralist}
+\usepackage{amsfonts}
+
+\oddsidemargin 0mm
+\evensidemargin 0mm
+\textwidth 160mm
+\textheight 200mm
+\renewcommand\baselinestretch{1.0}
+
+\pagestyle {plain}
+\pagenumbering{arabic}
+
+\newcounter{stepnum}
+
+\title{Module Interface Specification}
+\author{Michael Balas}
+
+\begin {document}
+
+\maketitle
+\section*{Overview of MIS}
+The Module Interface Specifications (MIS) precisely specifies the module's observable behaviour (i.e. \textit{what it does}), though it does not specify internal design. This idea is inspired from the principles of software engineering. 
+\subsection*{MIS Template}
+\subsubsection*{Uses}
+\begin{itemize}
+\item Specifies imported constants, data types and access programs. The specification of one module will often depend on using the interface specified by another module. When there are many modules the \emph{Uses} information is very useful for navigation of the documentation.
+\end{itemize}
+\subsubsection*{Syntax}
+\begin{itemize}
+\item Specifies exported constants and types, as well as access routine names with input and output parameter types and exceptions. Access routines are shown in a tabular format. 
+\end{itemize}
+\subsubsection*{Semantics}
+\begin{itemize}
+\item Specifies state variables (which define the state space) and state invariants (predicates on the state space that restrict the \textit{legal} states of the module). After every access routine call, the state should satisfy the invariant. Local functions, types and constants are also declared for specification purposes only, as well as any relevant considerations (for information that does not fit elsewhere). 
+\end{itemize}
+
+\newpage
+
+\section* {Point ADT Module}
+
+\subsection*{Template Module}
+
+pointADT
+
+\subsection* {Uses}
+
+N/A
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Types}
+
+PointT = ?
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new PointT & real, real & PointT & ~\\
+\hline
+xcrd & ~ & real & ~\\
+\hline
+ycrd & ~ & real & ~\\
+\hline
+dist & PointT & real & ~\\
+\hline
+rot & real & ~ & ~\\
+\hline
+
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {State Variables}
+
+$xc$: real\\
+$yc$: real
+
+\subsubsection* {State Invariant}
+None
+
+\subsubsection* {Assumptions}
+None
+
+\subsubsection* {Access Routine Semantics}
+
+new PointT ($x, y$):
+\begin{itemize}
+\item transition: $xc, yc := x, y$
+\item output: $out := \mathit{self}$
+\item exception: none
+\end{itemize}
+
+\noindent xcrd:
+\begin{itemize}
+\item output: $out := xc$
+\item exception: none
+\end{itemize}
+
+\noindent ycrd:
+\begin{itemize}
+\item output: $out := yc$
+\item exception: none
+\end{itemize}
+
+\noindent dist($p$):
+\begin{itemize}
+\item output:
+  $out := \sqrt{(xc - p.\mbox{xcrd()})^2 + (yc - p.\mbox{ycrd()})^2}$
+\item exception: none
+\end{itemize}
+
+\noindent rot($\phi$):
+\begin{itemize}
+\item $\phi$ is in radians
+\item transition: 
+
+$$\left [
+\begin{array}{c}
+xc\\
+yc\\
+\end{array}
+\right ] :=
+\left [
+\begin{array}{r r}
+\cos \phi & - \sin \phi\\
+\sin \phi & \cos \phi\\
+\end{array}
+\right ]
+\left [
+\begin{array}{c}
+xc\\
+yc\\
+\end{array}
+\right ]
+$$
+
+\item exception: none
+\end{itemize}
+
+\newpage
+
+\section* {Line Module}
+
+\subsection* {Template Module}
+
+lineADT
+
+\subsection* {Uses}
+
+pointADT
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Types}
+
+LineT = ?
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new LineT & PointT, PointT & LineT & ~\\
+\hline
+beg & ~ & PointT & ~\\
+\hline
+end & ~ & PointT & ~\\
+\hline 
+len & ~ & real & ~\\
+\hline
+mdpt & ~ & PointT & ~\\
+\hline
+rot & real & ~ & ~\\
+\hline
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {State Variables}
+
+$b$: PointT\\
+$e$: PointT
+
+\subsubsection* {State Invariant}
+None
+
+\subsubsection* {Assumptions}
+None
+
+\subsubsection* {Access Routine Semantics}
+
+\noindent new LineT ($p_1, p_2$):
+\begin{itemize}
+\item transition: $b, e := p_1, p_2$
+\item output: $out := \mathit{self}$
+\item exception: none
+\end{itemize}
+
+\noindent beg:
+\begin{itemize}
+\item output: $out := b$
+\item exception: none
+\end{itemize}
+
+\noindent end:
+\begin{itemize}
+\item output: $out := e$
+\item exception: none
+\end{itemize}
+
+\noindent len:
+\begin{itemize}
+\item output: $out := b.\mbox{dist}(e)$
+\item exception: none
+\end{itemize}
+
+\noindent mdpt:
+\begin{itemize}
+\item output:
+  $$out := \mbox{new~} \mbox{PointT} (\mbox{avg}(b.\mbox{xcrd()},
+  e.\mbox{xcrd()}), \mbox{avg}(b.\mbox{ycrd()}, e.\mbox{ycrd()}))$$
+\item exception: none
+\end{itemize}
+
+\noindent rot ($\phi$):
+\begin{itemize}
+\item $\phi$ is in radians
+\item transition: $b.\mbox{rot}(\phi), e.\mbox{rot}(\phi)$
+\item exception: none
+\end{itemize}
+
+\subsubsection*{Local Functions}
+
+avg: real $\times$ real $\rightarrow$ real
+
+\noindent avg($x_1, x_2$) $\equiv \frac{x_1 + x_2}{2}$
+
+\newpage
+
+\section* {Circle Module}
+
+\subsection* {Template Module}
+
+circleADT
+
+\subsection* {Uses}
+
+pointADT, lineADT
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Types}
+
+CircleT = ?
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+new CircleT & PointT, real & CircleT & ~\\
+\hline
+cen & ~ & PointT & ~\\
+\hline
+rad & ~ & real & ~\\
+\hline 
+area & ~ & real & ~\\
+\hline 
+intersect & CircleT & boolean & ~\\
+\hline
+connection & CircleT & LineT & ~\\
+\hline
+force & real $\rightarrow$ real & CircleT $\rightarrow$ real & ~\\
+\hline
+
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {State Variables}
+
+$c$: PointT\\
+$r$: real
+
+\subsubsection* {State Invariant}
+None
+
+\subsubsection* {Assumptions}
+None
+
+\subsubsection* {Access Routine Semantics}
+
+\noindent new CircleT ($\mathit{cin}, \mathit{rin}$):
+\begin{itemize}
+\item transition: $c, r := \mathit{cin}, \mathit{rin}$
+\item output: $out := \mathit{self}$
+\item exception: none
+\end{itemize}
+
+\noindent cen:
+\begin{itemize}
+\item output: $out := c$
+\item exception: none
+\end{itemize}
+
+\noindent rad:
+\begin{itemize}
+\item output: $out := r$
+\item exception: none
+\end{itemize}
+
+\noindent area:
+\begin{itemize}
+\item output: $out := \pi r^2$
+\item exception: none
+\end{itemize}
+
+\noindent intersect($ci$):
+\begin{itemize}
+\item output: $\exists ( p: \mbox{PointT} | \mbox{insideCircle}(p, ci) : \mbox{insideCircle}(p, \mathit{self}))$
+\item exception: none
+\end{itemize}
+
+\noindent connection($ci$):
+\begin{itemize}
+\item output: $out := \mbox{new~} \mbox{LineT} (c, ci.\mathit{cen()})$
+\item exception: none
+\end{itemize}
+
+\noindent force($f$):
+\begin{itemize}
+\item output: $out := \lambda x \rightarrow \mathit{self}.\mbox{area()} \cdot
+  x.\mbox{area()} \cdot f(\mathit{self}.\mbox{connection}(x).\mbox{len}())$
+\item exception: none
+\end{itemize}
+
+\subsubsection*{Local Functions}
+insideCircle: PointT $\times$ CircleT $\rightarrow$ boolean
+
+\noindent insideCircle($p, c$) $\equiv p.\mbox{dist}(c.\mbox{cen()}) \leq c.\mbox{rad()}$
+
+\newpage
+
+\section* {Deque Of Circles Module}
+
+\subsection* {Module}
+
+DequeCircleModule
+
+\subsection* {Uses}
+
+circleADT
+
+\subsection* {Syntax}
+
+\subsubsection* {Exported Constants}
+
+MAX\_SIZE = 20
+
+\subsubsection* {Exported Access Programs}
+
+\begin{tabular}{| l | l | l | l |}
+\hline
+\textbf{Routine name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions}\\
+\hline
+Deq\_init & ~ & ~ & ~\\
+\hline
+Deq\_pushBack & CircleT & ~ & FULL\\
+\hline
+Deq\_pushFront & CircleT & ~ & FULL\\
+\hline
+Deq\_popBack & ~ & ~ & EMPTY\\
+\hline
+Deq\_popFront & ~ & ~ & EMPTY\\
+\hline
+Deq\_back & ~ & CircleT & EMPTY\\
+\hline
+Deq\_front & ~ & CircleT & EMPTY\\
+\hline
+Deq\_size & ~ & integer & ~\\
+\hline
+Deq\_disjoint & ~ & boolean & EMPTY\\
+\hline
+Deq\_sumFx & real $\rightarrow$ real & real & EMPTY\\
+\hline
+Deq\_totalArea & ~ & real & EMPTY\\
+\hline
+Deq\_averageRadius & ~ & real & EMPTY\\
+\hline
+
+\end{tabular}
+
+\subsection* {Semantics}
+
+\subsubsection* {State Variables}
+$s$: sequence of CircleT
+
+\subsubsection* {State Invariant}
+$| s | \leq \mbox{MAX\_SIZE}$
+
+\subsubsection* {Assumptions}
+Deq\_init() is called before any other access program.
+
+\subsubsection* {Access Routine Semantics}
+
+Deq\_init():
+\begin{itemize}
+\item transition: $s := < >$
+\item exception: none
+\end{itemize}
+
+\noindent Deq\_pushBack($c$):
+\begin{itemize}
+\item transition: $s := s || <c>$
+\item exception: $exc := (|s| = \mbox{MAX\_SIZE} \Rightarrow  \mbox{FULL})$
+\end{itemize}
+
+\noindent Deq\_pushFront($c$):
+\begin{itemize}
+\item transition: $s := <c> || s $
+\item exception:  $exc := (|s| = \mbox{MAX\_SIZE} \Rightarrow  \mbox{FULL})$
+\end{itemize}
+
+\noindent Deq\_popBack():
+\begin{itemize}
+\item transition: $s := s[0..|s| - 2]$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_popFront():
+\begin{itemize}
+\item transition: $s := s[1..|s| - 1]$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_back():
+\begin{itemize}
+\item output: $out := s[|s| - 1]$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_front():
+\begin{itemize}
+\item output: $out := s[0]$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_size():
+\begin{itemize}
+\item output: $out := | s |$
+\item exception: none
+\end{itemize}
+
+\noindent Deq\_disjoint():
+\begin{itemize}
+\item output $$out := \forall(i, j:\mathbb{N} | i \in [0 .. |s| -1] \wedge j \in [0 .. |s| -1] \wedge i \neq j:\neg  
+s[i].\mbox{intersect}(s[j]))$$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_sumFx(f):
+\begin{itemize}
+\item output $$out := +(i: \mathbb{N} | i \in ([1 .. |s|-1]):
+  \mbox{Fx}(f, s[i], s[0]))$$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_totalArea():
+\begin{itemize}
+\item output $$out := +(i: \mathbb{N} | i \in ([0 .. |s|-1]):
+  s[i].area())$$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\noindent Deq\_averageRadius():
+\begin{itemize}
+\item output $$out := +(i: \mathbb{N} | i \in ([0 .. |s|-1]):
+  \frac{s[i].rad()}{|s|})$$
+\item exception: $exc := (|s| = 0 \Rightarrow \mbox{EMPTY})$
+\end{itemize}
+
+\subsubsection*{Local Functions}
+Fx: (real $\rightarrow$ real) $\times$ CircleT $\times$ CircleT $\rightarrow$ real
+
+\noindent Fx($f, ci, cj$) $\equiv \mbox{xcomp}(ci.\mbox{force}(f) (cj), ci, cj)$
+~\newline
+
+\noindent xcomp: real $\times$ CircleT $\times$ CircleT $\rightarrow$ real
+~\newline
+
+\noindent $$\mbox{xcomp}(F, ci, cj)
+\equiv F \left [ 
+\frac{ci.\mbox{cen()}.\mbox{xcrd()} -
+  cj.\mbox{cen()}.\mbox{xcrd()}} {ci.\mbox{connection}(cj).\mbox{len}()}
+\right ]$$
+
+\end {document}
