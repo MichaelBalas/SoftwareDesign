@@ -12,7 +12,7 @@ The purpose of this work is to design and specify modules to store the state of 
 - Notifications are produced for sunk ships
 - Notifications are produced when the game is over  
 
-All of the code is written in Java. Code files are documented using javadoc. The Module Interface Specifications can be found [here](specifications.pdf)
+All of the code is written in Java. Code files are documented using javadoc. The Module Interface Specifications can be found [here](specifications.pdf).
 ### Testing
 Module **battleshipTests.java** tests the implemented routines using JUnit. A rule named **test** is included in the makefile (named **Makefile**), which runs all test cases. 
 #### Author
